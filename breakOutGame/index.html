@@ -110,7 +110,7 @@
         constructor(r,c){
             this.canvas = document.getElementById("myCanvas");
             this.ctx = this.canvas.getContext("2d");
-            this.ball = new Ball(this.canvas.width/2,this.canvas.height/2);//สร้างลูกบอล
+            this.ball = [new Ball(this.canvas.width/2,this.canvas.height/2),new Ball(200,200)];//สร้างลูกบอล
             this.paddle = new Paddle();//สร้าง Paddle
             this.brick = [];
             this.row = r;
@@ -151,55 +151,60 @@
         }
         update(){//อัพเดตโลก
             this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ball.draw();
-            this.ball.move();
+            for(var c=0;c<this.ball.length;c++){
+                this.ball[c].draw();
+                this.ball[c].move();
+            }
             this.paddle.draw();
             this.drawBricks();
             this.collisionDetection();
             this.drawScore();
             this.drawLives();
-
-            if(this.ball.x + this.ball.speedX > this.canvas.width-this.ball.Radius || this.ball.x + this.ball.speedX  < this.ball.Radius) {//ตรวจสอบการชนระหว่างลูกบอลกับกำแพงขอบข้าง
-                this.ball.bounceX();
-            }
-            if(this.ball.y + this.ball.speedY < this.ball.Radius) {//ตรวจสอบการชนระหว่างลูกบอลกับกำแพงขอบบน
-                this.ball.bounceY();
-            }else if(this.ball.y + this.ball.speedY > this.canvas.height-this.ball.Radius){//ถ้าลูกบอลถูกรับโดย Paddle
-                if( this.ball.x > this.paddle.paddleX && this.ball.x < this.paddle.paddleX + this.paddle.paddleWidth){
-                    this.ball.bounceY();
-                }else{//ถ้ารับลูกบอลไม่ได้
-                    this.live --;//พลังชีวิตหาย
-                    if(this.live === 0){//ถ้าพลังชีวิตหมด
-                        alert("GAME OVER");
-                        document.location.reload();
-                        clearInterval(this.interval); // Needed for Chrome to end game
-                    }else{//นำพลังชีวิตมาสร้างโลกใหม่
-                        this.ball.x = this.canvas.width/2;
-                        this.ball.y = this.canvas.height/2;
-                        this.ball.speedX = 2;
-                        this.ball.speedY = -2;
-                        this.paddle.paddleX = (this.canvas.width-this.paddle.paddleWidth)/2;
-                    }
-                    
+            for(var c=0;c<this.ball.length;c++){
+                if(this.ball[c].x + this.ball[c].speedX > this.canvas.width-this.ball[c].Radius || this.ball[c].x + this.ball[c].speedX  < this.ball[c].Radius) {//ตรวจสอบการชนระหว่างลูกบอลกับกำแพงขอบข้าง
+                    this.ball[c].bounceX();
                 }
-
+                if(this.ball[c].y + this.ball[c].speedY < this.ball[c].Radius) {//ตรวจสอบการชนระหว่างลูกบอลกับกำแพงขอบบน
+                    this.ball[c].bounceY();
+                }
+                else if(this.ball[c].y + this.ball[c].speedY > this.canvas.height-this.ball[c].Radius){//ถ้าลูกบอลถูกรับโดย Paddle
+                    if( this.ball[c].x > this.paddle.paddleX && this.ball[c].x < this.paddle.paddleX + this.paddle.paddleWidth){
+                        this.ball[c].bounceY();
+                    }else{//ถ้ารับลูกบอลไม่ได้
+                        this.live --;//พลังชีวิตหาย
+                        if(this.live === 0){//ถ้าพลังชีวิตหมด
+                            alert("GAME OVER");
+                            document.location.reload();
+                            clearInterval(this.interval); // Needed for Chrome to end game
+                        }else{//นำพลังชีวิตมาสร้างโลกใหม่
+                            this.ball[c].x = this.canvas.width/2;
+                            this.ball[c].y = this.canvas.height/2;
+                            this.ball[c].speedX = 2;
+                            this.ball[c].speedY = -2;
+                            this.paddle.paddleX = (this.canvas.width-this.paddle.paddleWidth)/2;
+                        }
+                    
+                    }
+                }
             }
         }
         collisionDetection(){//ตรวจสอบว่าลูกบอลชนกับกำแพง
-            for(var c=0; c<this.column; c++) {
-                for(var r=0; r<this.row; r++) {
-                    this.brickBlock = this.brick[c][r];
-                    if(this.brickBlock.status == 1) {//ถ้ากำแพงยังไม่ถูกทำลาย
-                        if(this.ball.x > this.brickBlock.x && this.ball.x < this.brickBlock.x+this.brickBlock.width && this.ball.y > this.brickBlock.y && this.ball.y < this.brickBlock.y+this.brickBlock.height) {
-                            //ถ้ากำแพงถูกชน
-                            this.ball.speedY = -this.ball.speedY;
-                            this.brickBlock.status = 0;//กำแพงหายไป
-                            this.score ++;//คะแนนเพิ่ม
-                            if(this.score == this.row*this.column) {//ถ้ากำแพงถูกทำลายทั้งหมด
-                                alert("YOU WIN, CONGRATULATIONS!");
-                                document.location.reload();
-                                clearInterval(this.interval); // Needed for Chrome to end game
-                    }
+            for(var count = 0;count<this.ball.length;count++){
+                for(var c=0; c<this.column; c++) {
+                    for(var r=0; r<this.row; r++) {
+                        this.brickBlock = this.brick[c][r];
+                        if(this.brickBlock.status == 1) {//ถ้ากำแพงยังไม่ถูกทำลาย
+                            if(this.ball[count].x > this.brickBlock.x && this.ball[count].x < this.brickBlock.x+this.brickBlock.width && this.ball[count].y > this.brickBlock.y && this.ball[count].y < this.brickBlock.y+this.brickBlock.height) {
+                                //ถ้ากำแพงถูกชน
+                                this.ball[count].speedY = -this.ball[count].speedY;
+                                this.brickBlock.status = 0;//กำแพงหายไป
+                                this.score ++;//คะแนนเพิ่ม
+                                if(this.score == this.row*this.column) {//ถ้ากำแพงถูกทำลายทั้งหมด
+                                    alert("YOU WIN, CONGRATULATIONS!");
+                                    document.location.reload();
+                                    clearInterval(this.interval); // Needed for Chrome to end game
+                                }
+                            }
                         }
                     }
                 }
